@@ -1,4 +1,5 @@
 import React from "react";
+import Footer from "../Footer/page";
 
 const Landing = () => {
     return (
@@ -34,7 +35,7 @@ const Landing = () => {
                 </button>
             </div>
            
-            <div className="w-full flex justify-center gap-8 mt-16 px-8">
+            <div className="w-full flex justify-center gap-8 mt-16 px-8 pb-16">
                 {/* Card 1 */}
                 <div className="relative w-[500px] h-[400px] bg-cover bg-center rounded-lg" style={{ backgroundImage: 'url(img/image.svg)' }}>
                     <div className="absolute bottom-4 left-4 w-full p-4">
@@ -59,6 +60,8 @@ const Landing = () => {
                     </div>
                 </div>
             </div>
+
+            <Footer />
         </>
     );
 };
