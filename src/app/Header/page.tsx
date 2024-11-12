@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 const   Header = () => {
     return(
 
@@ -10,12 +11,12 @@ const   Header = () => {
                         LIYT
                     </p>
                     <div className="flex space-x-6 text-white">
-                        <p>Home</p>
-                        <p>About</p>
-                        <p>Dashboard</p>
+                        <Link href={"/Landing"}> <p>Home</p></Link>
+                        <Link href={"/About"}> <p>About</p></Link>
+                        <Link href={"/Dashboard"}> <p>Dashboard</p></Link>
                     </div>
                     <button
-                        className="text-white border border-white px-4 py-2 rounded-lg hover:bg-white hover:text-purple-600 transition"
+                        className="text-white border border-white px-4 py-2 rounded-lg hover:bg-white hover:text-purple-600 transition" onClick={() => window.location.href = "/signup"}
                     >
                         Sign Up
                     </button>
