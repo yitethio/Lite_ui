@@ -1,6 +1,9 @@
 "use client";
 import React, { useState } from "react"; // Add useState here
 import Header from "../Header/page";
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("@/app/map"), { ssr: false });
 
 const Orders = () => {
   const [activeTab, setActiveTab] = useState("All Order");
@@ -73,8 +76,6 @@ const Orders = () => {
             <table className="min-w-full bg-white border">
               <thead>
                 <tr className="text-gray-800">
-                  {" "}
-                  {/* Darker header text color */}
                   <th className="px-4 py-2 text-left border-b">Order ID</th>
                   <th className="px-4 py-2 text-left border-b">Item</th>
                   <th className="px-4 py-2 text-left border-b">Pick up</th>
@@ -86,8 +87,6 @@ const Orders = () => {
               <tbody>
                 {orders.map((order, index) => (
                   <tr key={index} className="border-b text-gray-800">
-                    {" "}
-                    {/* Darker row text color */}
                     <td className="px-4 py-2">{order.id}</td>
                     <td className="px-4 py-2">{order.item}</td>
                     <td className="px-4 py-2">{order.pickup}</td>
@@ -177,7 +176,9 @@ const Orders = () => {
                         />
                       </div>
                     </div>
-                    <div className="w-1/2">Map goes here</div>
+                    <div className="w-1/2">
+                      <Map zoom={14} h={50} />
+                    </div>
                   </div>
                   <div className="flex justify-end space-x-4 mt-16">
                     <button
