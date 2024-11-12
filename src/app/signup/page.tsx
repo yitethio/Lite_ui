@@ -23,7 +23,7 @@ const SignUp = () => {
   const [secondarySuggestions, setSecondarySuggestions] = useState([]);
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleNext = (e) => {
+  const handleNext = (e: any) => {
     e.preventDefault();
     setStep(2);
   };
@@ -70,6 +70,9 @@ const SignUp = () => {
   };
 
   const handleSignUp = async (e) => {
+
+
+
     e.preventDefault();
 
     if (formData.password_digest !== confirmPassword) {
@@ -101,6 +104,7 @@ const SignUp = () => {
   return (
     <>
       <Header />
+
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden flex max-w-4xl w-full">
           <div className="pt-10 w-1/2 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-10 text-white flex flex-col justify-center">
@@ -117,6 +121,7 @@ const SignUp = () => {
           <div className="w-1/2 p-10">
             <h2 className="text-3xl font-bold mb-6">Sign Up</h2>
             <form className="space-y-4" onSubmit={step === 1 ? handleNext : handleSignUp}>
+
               {step === 1 && (
                 <>
                   <div className="flex gap-4">
@@ -175,6 +180,7 @@ const SignUp = () => {
                     onChange={handleChange}
                     required
                   />
+
 
                   <div className="relative">
                     <input
@@ -235,6 +241,9 @@ const SignUp = () => {
                       </ul>
                     )}
                   </div>
+
+
+                
 
                   <button
                     type="submit"
