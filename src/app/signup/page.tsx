@@ -4,6 +4,7 @@ import Header from "../Header/page";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
+  const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,14 +32,44 @@ const SignUp = () => {
     }));
   };
 
-  
+  const useCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            );
+            if (response.ok) {
+              const data = await response.json();
+              const address = data.display_name; // Human-readable address
+              setFormData((prevData) => ({
+                ...prevData,
+                primaryAddress: address,
+              }));
+            } else {
+              setFormError("Unable to fetch address. Please try again.");
+            }
+          } catch (err) {
+            setFormError("An error occurred. Please try again.");
+          }
+        },
+        (error) => {
+          setFormError("Unable to retrieve location. Please check location permissions.");
+        }
+      );
+    } else {
+      setFormError("Geolocation is not supported by this browser.");
+    }
+  };
 
-  const handleSignUp = async (e) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     // Validate password match
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setFormError("Passwords do not match"); // This will now be allowed
       return;
     }
 
@@ -70,10 +101,19 @@ const SignUp = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden flex max-w-4xl w-full">
           {/* Left Side */}
-          <div className="w-1/2 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-10 text-white flex flex-col justify-center">
+          <div className="pt-10 w-1/2 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-10 text-white flex flex-col justify-center">
             <h1 className="text-4xl font-bold mb-2">LIYT</h1>
             <h2 className="text-2xl font-semibold mb-4">Revolutionize Your Delivery System</h2>
             <p className="text-lg">Revolutionize Your Delivery System</p>
+            <div className="mt-10 pt-40">
+              <p className="text-lg">Already have an account?</p>
+              <a
+                href="/Login"
+                className="text-white underline mt-2 inline-block hover:text-gray-200"
+              >
+                Log in here
+              </a>
+            </div>
           </div>
 
           {/* Right Side - Form */}
@@ -148,6 +188,13 @@ const SignUp = () => {
                     onChange={handleChange}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={useCurrentLocation}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold mt-2"
+                  >
+                    Use Current Location
+                  </button>
                   <input
                     type="text"
                     name="secondaryAddress"
