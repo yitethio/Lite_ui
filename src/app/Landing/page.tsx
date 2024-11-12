@@ -4,7 +4,7 @@ import Footer from "../Footer/page";
 
 import Link from "next/link";
 
-import Footer from "../Footer/page";
+
 
 
 const Landing = () => {

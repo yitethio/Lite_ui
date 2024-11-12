@@ -5,6 +5,8 @@ import { FaSearch } from "react-icons/fa";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     id: 1,
     first_name: "",
@@ -28,7 +30,7 @@ const SignUp = () => {
     setStep(2);
   };
 
-  const fetchLocationSuggestions = async (query, type) => {
+  const fetchLocationSuggestions = async (query: any, type: any) => {
     try {
       const response = await fetch(`https://liyt-api-1.onrender.com/location/${query}`);
       const data = await response.json();
@@ -42,7 +44,7 @@ const SignUp = () => {
     }
   };
 
-  const handleLocationSelect = (location, type) => {
+  const handleLocationSelect = (location:any, type:any) => {
     const { latitude, longitude, name } = location;
     if (type === "primary") {
       setFormData((prevData) => ({
@@ -61,7 +63,7 @@ const SignUp = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e:any) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -69,14 +71,14 @@ const SignUp = () => {
     }));
   };
 
-  const handleSignUp = async (e) => {
+  const handleSignUp = async (e :any) => {
 
 
 
     e.preventDefault();
 
     if (formData.password_digest !== confirmPassword) {
-      setFormError("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
@@ -199,7 +201,7 @@ const SignUp = () => {
                     </button>
                     {primarySuggestions.length > 0 && (
                       <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1">
-                        {primarySuggestions.map((location, index) => (
+                        {primarySuggestions.map((location: any, index) => (
                           <li
                             key={index}
                             className="p-2 hover:bg-gray-100 cursor-pointer"
@@ -229,7 +231,7 @@ const SignUp = () => {
                     </button>
                     {secondarySuggestions.length > 0 && (
                       <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1">
-                        {secondarySuggestions.map((location, index) => (
+                        {secondarySuggestions.map((location : any, index) => (
                           <li
                             key={index}
                             className="p-2 hover:bg-gray-100 cursor-pointer"
