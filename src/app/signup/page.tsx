@@ -1,27 +1,64 @@
 "use client";
 import React, { useState } from "react";
 import Header from "../Header/page";
+import { FaSearch } from "react-icons/fa";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
-  const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    businessName: "",
-    businessEmail: "",
+    id: 1,
+    first_name: "",
+    last_name: "",
+    phone_number: "",
     email: "",
-    primaryAddress: "",
-    secondaryAddress: "",
-    password: "",
-    confirmPassword: "",
+    password_digest: "",
+    business_name: "",
+    business_email: "",
+    primary_address: { latitude: null as number | null, longitude: null as number | null },
+    secondary_address: { latitude: null as number | null, longitude: null as number | null },
   });
-  const [error, setError] = useState(null);
+  const [primaryAddressInput, setPrimaryAddressInput] = useState("");
+  const [secondaryAddressInput, setSecondaryAddressInput] = useState("");
+  const [primarySuggestions, setPrimarySuggestions] = useState([]);
+  const [secondarySuggestions, setSecondarySuggestions] = useState([]);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleNext = (e) => {
     e.preventDefault();
     setStep(2);
+  };
+
+  const fetchLocationSuggestions = async (query, type) => {
+    try {
+      const response = await fetch(`https://liyt-api-1.onrender.com/location/${query}`);
+      const data = await response.json();
+      if (type === "primary") {
+        setPrimarySuggestions(data.payload.data);
+      } else {
+        setSecondarySuggestions(data.payload.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch location suggestions", error);
+    }
+  };
+
+  const handleLocationSelect = (location, type) => {
+    const { latitude, longitude, name } = location;
+    if (type === "primary") {
+      setFormData((prevData) => ({
+        ...prevData,
+        primary_address: { latitude, longitude },
+      }));
+      setPrimaryAddressInput(name);
+      setPrimarySuggestions([]);
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        secondary_address: { latitude, longitude },
+      }));
+      setSecondaryAddressInput(name);
+      setSecondarySuggestions([]);
+    }
   };
 
   const handleChange = (e) => {
@@ -32,44 +69,11 @@ const SignUp = () => {
     }));
   };
 
-  const useCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-            );
-            if (response.ok) {
-              const data = await response.json();
-              const address = data.display_name; // Human-readable address
-              setFormData((prevData) => ({
-                ...prevData,
-                primaryAddress: address,
-              }));
-            } else {
-              setFormError("Unable to fetch address. Please try again.");
-            }
-          } catch (err) {
-            setFormError("An error occurred. Please try again.");
-          }
-        },
-        (error) => {
-          setFormError("Unable to retrieve location. Please check location permissions.");
-        }
-      );
-    } else {
-      setFormError("Geolocation is not supported by this browser.");
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
-  
-    // Validate password match
-    if (formData.password !== formData.confirmPassword) {
-      setFormError("Passwords do not match"); // This will now be allowed
+
+    if (formData.password_digest !== confirmPassword) {
+      setFormError("Passwords do not match");
       return;
     }
 
@@ -83,9 +87,7 @@ const SignUp = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
         alert("Account created successfully!");
-        // Redirect to login or dashboard page
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Sign-up failed");
@@ -95,78 +97,72 @@ const SignUp = () => {
     }
   };
 
+
   return (
     <>
       <Header />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden flex max-w-4xl w-full">
-          {/* Left Side */}
           <div className="pt-10 w-1/2 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-10 text-white flex flex-col justify-center">
             <h1 className="text-4xl font-bold mb-2">LIYT</h1>
             <h2 className="text-2xl font-semibold mb-4">Revolutionize Your Delivery System</h2>
-            <p className="text-lg">Revolutionize Your Delivery System</p>
             <div className="mt-10 pt-40">
               <p className="text-lg">Already have an account?</p>
-              <a
-                href="/Login"
-                className="text-white underline mt-2 inline-block hover:text-gray-200"
-              >
+              <a href="/Login" className="text-white underline mt-2 inline-block hover:text-gray-200">
                 Log in here
               </a>
             </div>
           </div>
 
-          {/* Right Side - Form */}
           <div className="w-1/2 p-10">
             <h2 className="text-3xl font-bold mb-6">Sign Up</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
             <form className="space-y-4" onSubmit={step === 1 ? handleNext : handleSignUp}>
               {step === 1 && (
                 <>
-                  <div className="flex space-x-4">
+                  <div className="flex gap-4">
                     <input
                       type="text"
-                      name="firstName"
+                      name="first_name"
                       placeholder="First Name"
                       className="w-1/2 p-3 border border-gray-300 rounded-md"
-                      value={formData.firstName}
+                      value={formData.first_name}
                       onChange={handleChange}
                       required
                     />
                     <input
                       type="text"
-                      name="lastName"
+                      name="last_name"
                       placeholder="Last Name"
                       className="w-1/2 p-3 border border-gray-300 rounded-md"
-                      value={formData.lastName}
+                      value={formData.last_name}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <input
                     type="text"
-                    name="phoneNumber"
+                    name="phone_number"
                     placeholder="Phone Number"
                     className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.phoneNumber}
+                    value={formData.phone_number}
                     onChange={handleChange}
                     required
                   />
                   <input
                     type="text"
-                    name="businessName"
+                    name="business_name"
                     placeholder="Business Name"
                     className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.businessName}
+                    value={formData.business_name}
                     onChange={handleChange}
                     required
                   />
                   <input
-                    type="text"
-                    name="businessEmail"
+                    type="email"
+                    name="business_email"
                     placeholder="Business Email"
                     className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.businessEmail}
+                    value={formData.business_email}
                     onChange={handleChange}
                     required
                   />
@@ -179,31 +175,67 @@ const SignUp = () => {
                     onChange={handleChange}
                     required
                   />
-                  <input
-                    type="text"
-                    name="primaryAddress"
-                    placeholder="Primary address"
-                    className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.primaryAddress}
-                    onChange={handleChange}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={useCurrentLocation}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold mt-2"
-                  >
-                    Use Current Location
-                  </button>
-                  <input
-                    type="text"
-                    name="secondaryAddress"
-                    placeholder="Secondary address"
-                    className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.secondaryAddress}
-                    onChange={handleChange}
-                    required
-                  />
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Primary Address"
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      value={primaryAddressInput}
+                      onChange={(e) => setPrimaryAddressInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fetchLocationSuggestions(primaryAddressInput, "primary")}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      <FaSearch className="text-gray-500" />
+                    </button>
+                    {primarySuggestions.length > 0 && (
+                      <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1">
+                        {primarySuggestions.map((location, index) => (
+                          <li
+                            key={index}
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handleLocationSelect(location, "primary")}
+                          >
+                            {location.name} - {location.City}, {location.Country}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Secondary Address"
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      value={secondaryAddressInput}
+                      onChange={(e) => setSecondaryAddressInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fetchLocationSuggestions(secondaryAddressInput, "secondary")}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      <FaSearch className="text-gray-500" />
+                    </button>
+                    {secondarySuggestions.length > 0 && (
+                      <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1">
+                        {secondarySuggestions.map((location, index) => (
+                          <li
+                            key={index}
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => handleLocationSelect(location, "secondary")}
+                          >
+                            {location.name} - {location.City}, {location.Country}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
                   <button
                     type="submit"
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-md font-semibold"
@@ -217,10 +249,10 @@ const SignUp = () => {
                 <>
                   <input
                     type="password"
-                    name="password"
+                    name="password_digest"
                     placeholder="Password"
                     className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.password}
+                    value={formData.password_digest}
                     onChange={handleChange}
                     required
                   />
@@ -229,8 +261,8 @@ const SignUp = () => {
                     name="confirmPassword"
                     placeholder="Confirm Password"
                     className="w-full p-3 border border-gray-300 rounded-md"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                   <button
