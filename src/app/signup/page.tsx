@@ -74,7 +74,7 @@ const SignUp = () => {
     }
 
     try {
-      const response = await fetch("/api/signup", {
+      const response = await fetch("https://liyt-api-1.onrender.com/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
