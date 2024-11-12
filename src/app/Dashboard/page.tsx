@@ -10,7 +10,9 @@ const Orders = () => {
   const [orders, setOrders] = useState([]); // State for orders data
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const handleTabClick = (tab: any) => {
     setActiveTab(tab);
@@ -28,7 +30,10 @@ const Orders = () => {
         }
         const data = await response.json();
         setOrders(data); // Update orders state with fetched data
+
+
       } catch (err: any) {
+
         setError(err.message);
       } finally {
         setLoading(false);
@@ -38,10 +43,12 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+
   // Filter orders based on active tab
   const filteredOrders = orders.filter((order: any) =>
     activeTab === "All Order" ? true : order.status === activeTab
   );
+
 
   return (
     <>
@@ -50,10 +57,13 @@ const Orders = () => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">Orders Details</h1>
+
+
             <button
               onClick={() => setIsModalOpen(true)}
               className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-semibold"
             >
+
               New Orders
             </button>
           </div>
@@ -64,9 +74,12 @@ const Orders = () => {
                 key={tab}
                 onClick={() => handleTabClick(tab)}
                 className={`py-2 ${
+
+
                   activeTab === tab
                     ? "border-b-2 border-blue-600 text-blue-600"
                     : "text-gray-500"
+
                 }`}
               >
                 {tab}
@@ -86,15 +99,21 @@ const Orders = () => {
                     <th className="px-4 py-2 text-left border-b">Order ID</th>
                     <th className="px-4 py-2 text-left border-b">Customer</th>
                     <th className="px-4 py-2 text-left border-b">Origin</th>
+
+
                     <th className="px-4 py-2 text-left border-b">
                       Destination
                     </th>
+
                     <th className="px-4 py-2 text-left border-b">Date</th>
                     <th className="px-4 py-2 text-left border-b">Status</th>
                   </tr>
                 </thead>
                 <tbody>
+
+
                   {filteredOrders.map((order: any) => (
+
                     <tr key={order.id} className="border-b text-gray-800">
                       <td className="px-4 py-2">{order.id}</td>
                       <td className="px-4 py-2">{order.customer_name}</td>
@@ -120,6 +139,8 @@ const Orders = () => {
               </table>
             </div>
           )}
+
+
           {isModalOpen && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
               <div className="bg-black w-5/6 h-5/6 flex justify-center items-center bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500">
@@ -208,6 +229,7 @@ const Orders = () => {
               </div>
             </div>
           )}
+
         </div>
       </div>
     </>
