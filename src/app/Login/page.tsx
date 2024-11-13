@@ -51,7 +51,9 @@ const Login = () => {
           <div className="w-1/2 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 p-10 text-white flex flex-col justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2">LIYT</h1>
-              <h2 className="text-2xl font-semibold mb-4">Revolutionize Your Delivery System</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                Revolutionize Your Delivery System
+              </h2>
               <p className="text-lg">Revolutionize Your Delivery System</p>
             </div>
             <div className="mt-10">
