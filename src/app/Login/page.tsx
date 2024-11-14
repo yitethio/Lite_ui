@@ -46,35 +46,13 @@ const Login = () => {
         const errorData = await response.json();
         setError(errorData.message || "Login failed");
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-    }
-  };
-
-  const fetchUserData = async (token: string) => {
-    try {
-      const response = await fetch("/api/user", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        console.log("User Data:", userData);
-        // Set user data in state or context if needed
-      } else {
-        console.error("Failed to fetch user data");
-      }
     } catch (error) {
-      console.error("An error occurred while fetching user data:", error);
+      setError("An error occurred. Please try again.");
     }
   };
 
   return (
     <>
-      <Header />
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden flex max-w-4xl w-full">
           {/* Left Side */}

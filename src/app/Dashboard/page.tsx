@@ -23,8 +23,9 @@ const Orders = () => {
   const [destinationLon, setDestinationLon] = useState("");
   const [price, setPrice] = useState();
   const [mapOpen, setMapOpen] = useState(false);
+  const userId = localStorage.getItem("userId");
   const [formData, setFormData] = useState({
-    user_id: 1,
+    user_id: userId,
     driver_id: 2,
     status: "pending",
     origin: `${originLat},${originLon}`,
