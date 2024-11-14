@@ -12,12 +12,11 @@ const SignUp = () => {
   const [isPasswordConfirmVisible, setIsPasswordConfirmVisible] =
     useState(false);
   const [formData, setFormData] = useState({
-    id: 1,
     first_name: "",
     last_name: "",
     phone_number: "",
     email: "",
-    password_digest: "",
+    password: "",
     business_name: "",
     business_email: "",
     primary_address: {
@@ -88,18 +87,18 @@ const SignUp = () => {
   const handleSignUp = async (e: any) => {
     e.preventDefault();
 
-    if (formData.password_digest !== confirmPassword) {
+    if (formData.password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
     try {
-      const response = await fetch("https://liyt-api-1.onrender.com/users", {
+      const response = await fetch("https://liyt-api-1.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ user: formData }),
       });
 
       if (response.ok) {
@@ -181,10 +180,10 @@ const SignUp = () => {
                   <div className="relative mb-4 w-1/2">
                     <input
                       type={isPasswordVisible ? "text" : "password"}
-                      name="password_digest"
+                      name="password"
                       placeholder="Password"
                       className="w-full p-3 border border-gray-300 rounded-md"
-                      value={formData.password_digest}
+                      value={formData.password}
                       onChange={handleChange}
                       required
                     />

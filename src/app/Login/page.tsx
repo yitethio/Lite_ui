@@ -1,15 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import Header from "../Header/page";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -17,28 +18,57 @@ const Login = () => {
     }));
   };
 
-  const handleLogin = async (e) => {
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("https://liyt-api-1.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ auth: formData }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        alert("Login successful!");
-        // Redirect to dashboard or another page
+        const { token, user } = data;
+
+        if (token && user) {
+          // Store token and user ID in localStorage
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("userId", user.id);
+          router.push("/Landing");
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Login failed");
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
+    }
+  };
+
+  const fetchUserData = async (token: string) => {
+    try {
+      const response = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        console.log("User Data:", userData);
+        // Set user data in state or context if needed
+      } else {
+        console.error("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.error("An error occurred while fetching user data:", error);
     }
   };
 
