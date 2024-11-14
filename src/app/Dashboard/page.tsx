@@ -10,12 +10,29 @@ const Orders = () => {
   const [activeTab, setActiveTab] = useState("All Order");
   const [orders, setOrders] = useState([]); // State for orders data
   const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [error, setError] = useState(null as any); // Error state
   const [pickUp, setPickUp] = useState([]);
   const [dropOff, setDropOff] = useState([]);
   const [pickUpInput, setPickUpInput] = useState("");
   const [dropOffInput, setDropOffInput] = useState("");
-  const [formData, setFormData] = useState({});
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
+  const [originLat, setOriginLat] = useState("");
+  const [originLon, setOriginLon] = useState("");
+  const [destinationLat, setDestinationLat] = useState("");
+  const [destinationLon, setDestinationLon] = useState("");
+  const [price, setPrice] = useState();
+  const [mapOpen, setMapOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    user_id: 1,
+    driver_id: 2,
+    status: "pending",
+    origin: `${originLat},${originLon}`,
+    destination: `${destinationLat},${destinationLon}`,
+    price: 0,
+    customer_name: "",
+    customer_phone_number: "",
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -23,24 +40,31 @@ const Orders = () => {
     setActiveTab(tab);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("https://liyt-api-1.onrender.com/orders");
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+      const data = await response.json();
+      setOrders(data); // Update orders state with fetched data
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     // Fetch orders data from API
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch("https://liyt-api-1.onrender.com/orders");
-        if (!response.ok) {
-          throw new Error("Failed to fetch orders");
-        }
-        const data = await response.json();
-        setOrders(data); // Update orders state with fetched data
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchOrders();
   }, []);
@@ -61,22 +85,54 @@ const Orders = () => {
     }
   };
 
+  const handleSubmi = () => {
+    console.log(formData);
+  };
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("https://liyt-api-1.onrender.com/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setIsModalOpen(false);
+        await fetchOrders();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to create order");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+      console.error("Order creation error:", error);
+    }
+  };
+
   const handleLocationSelect = (location: any, type: any) => {
     const { latitude, longitude, name } = location;
     if (type === "primary") {
-      setFormData((prevData) => ({
-        ...prevData,
-        primary_address: { latitude, longitude },
-      }));
+      console.log(latitude);
       setPickUpInput(name);
       setPickUp([]);
-    } else {
+      console.log(longitude);
+      setOriginLat(latitude);
+      setOriginLon(longitude);
       setFormData((prevData) => ({
         ...prevData,
-        secondary_address: { latitude, longitude },
+        origin: `${latitude},${longitude}`,
       }));
+    } else {
       setDropOffInput(name);
       setDropOff([]);
+      setDestinationLat(latitude);
+      setDestinationLon(longitude);
+      setFormData((prevData) => ({
+        ...prevData,
+        destination: `${latitude},${longitude}`,
+      }));
     }
   };
 
@@ -84,6 +140,29 @@ const Orders = () => {
   const filteredOrders = orders.filter((order: any) =>
     activeTab === "All Order" ? true : order.status === activeTab
   );
+
+  const handlePriceCalculation = async (
+    originLat: any,
+    originLon: any,
+    destinationlat: any,
+    destinationlon: any
+  ) => {
+    try {
+      const response = await fetch(
+        `https://liyt-api-1.onrender.com/orders/get_price?origin=${originLat},${originLon}&destination=${destinationlat},${destinationlon}`
+      );
+      const data = await response.json();
+      // console.log(data);
+      setPrice(data.payload);
+      setFormData((prevData) => ({
+        ...prevData,
+        price: data.payload,
+      }));
+      setMapOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch price", error);
+    }
+  };
 
   return (
     <>
@@ -173,23 +252,38 @@ const Orders = () => {
                   <h2 className="text-xl font-bold mb-4">Create New Order</h2>
                   <form>
                     <div className="flex justify-evenly">
+                      <div className="w-1/2">
+                        <Map
+                          zoom={12}
+                          h={50}
+                          origin={{ lat: originLat, lon: originLon }}
+                          destination={{
+                            lat: destinationLat,
+                            lon: destinationLon,
+                          }}
+                        />
+                      </div>
                       <div className="w-1/3">
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
                           <label className="block text-gray-700">Item:</label>
                           <input
                             type="text"
                             className="w-full p-2 border rounded"
                             placeholder="Enter Item"
+                            onChange={handleChange}
                           />
-                        </div>
+                        </div> */}
                         <div className="mb-4">
                           <label className="block text-gray-700">
                             Recipient name:
                           </label>
                           <input
                             type="text"
+                            name="customer_name"
+                            value={formData.customer_name}
                             className="w-full p-2 border rounded"
                             placeholder="Enter Item"
+                            onChange={handleChange}
                           />
                         </div>
                         <div className="mb-4">
@@ -198,8 +292,11 @@ const Orders = () => {
                           </label>
                           <input
                             type="text"
+                            name="customer_phone_number"
+                            value={formData.customer_phone_number}
                             className="w-full p-2 border rounded"
                             placeholder="Enter Item"
+                            onChange={handleChange}
                           />
                         </div>
                         <div className="relative mb-4">
@@ -273,16 +370,24 @@ const Orders = () => {
                             </ul>
                           )}
                         </div>
-                        <div className="mb-4">
-                          <label className="block text-gray-700">Date:</label>
-                          <input
-                            type="date"
-                            className="w-full p-2 border rounded"
-                          />
+                        <div className="flex justify-between w-full mt-4">
+                          <button
+                            type="button" // Ensures this button doesn’t submit the form
+                            onClick={(e) => {
+                              e.preventDefault(); // Prevents form submission behavior
+                              handlePriceCalculation(
+                                originLat,
+                                originLon,
+                                destinationLat,
+                                destinationLon
+                              );
+                            }}
+                            className="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded"
+                          >
+                            Calculate Price
+                          </button>
+                          <div>Price: {price ? `${price}birr` : "N/A"}</div>
                         </div>
-                      </div>
-                      <div className="w-1/2">
-                        <Map zoom={14} h={50} />
                       </div>
                     </div>
                     <div className="flex justify-end space-x-4 mt-16">
@@ -294,7 +399,11 @@ const Orders = () => {
                         Cancel
                       </button>
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevents form submission behavior
+                          handleSubmit();
+                        }}
                         className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded"
                       >
                         Create Order
