@@ -24,6 +24,7 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const router = useRouter();
+  
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
