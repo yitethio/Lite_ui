@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 import { FiMenu } from "react-icons/fi";
 import { FaMapMarkerAlt } from "react-icons/fa";
 
@@ -7,8 +8,8 @@ const Orders = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [expandedCard, setExpandedCard] = useState(null);
   const [orders, setOrders] = useState([]);
+  const router = useRouter(); // Initialize router
 
-  // Map API statuses to app statuses
   const mapApiStatusToUiStatus = (apiStatus) => {
     switch (apiStatus) {
       case "pending":
@@ -22,15 +23,14 @@ const Orders = () => {
     }
   };
 
-  // Fetch orders from the API
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch("https://liyt-api-1.onrender.com/orders"); // Replace with the actual API endpoint
+        const response = await fetch("https://liyt-api-1.onrender.com/orders");
         const data = await response.json();
         const formattedOrders = data.map((order) => ({
           id: order.id,
-          item: `Job #${order.id}`, // Placeholder for item name
+          item: `Job #${order.id}`,
           origin: order.origin,
           destination: order.destination,
           price: order.price,
@@ -57,19 +57,20 @@ const Orders = () => {
 
   const handleAcceptJob = async (orderId) => {
     try {
-      // Update status to "delivering" in the API
       await fetch(`/api/orders/${orderId}/accept`, { method: "POST" });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: "Delivering" } : order
         )
       );
+
+      // Navigate to JobDetails page with the order ID
+      router.push(`/Driver/${orderId}`);
     } catch (error) {
       console.error("Failed to accept job:", error);
     }
   };
 
-  // Filter orders based on active tab
   const filteredOrders =
     activeTab === "All"
       ? orders
@@ -77,14 +78,12 @@ const Orders = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Full-width Header */}
       <div className="w-full p-4 bg-gradient-to-r from-purple-600 to-blue-400 text-white flex items-center justify-between shadow-md fixed top-0">
         <FiMenu size={24} className="cursor-pointer" />
         <h1 className="text-xl font-bold flex-grow text-center">LIYT</h1>
       </div>
 
       <div className="pt-20 p-4">
-        {/* Tabs for filtering */}
         <div className="flex space-x-4 mb-4 overflow-x-auto">
           {["All", "Completed", "Delivering", "Available"].map((tab) => (
             <button
@@ -101,7 +100,6 @@ const Orders = () => {
           ))}
         </div>
 
-        {/* Orders List */}
         <div className="space-y-4">
           {filteredOrders.map((order) => (
             <div
@@ -144,7 +142,9 @@ const Orders = () => {
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
                     <FaMapMarkerAlt className="text-blue-500" />
-                    <p className="text-sm text-gray-700">{order.destination}</p>
+                    <p className="text-sm text-gray-700">
+                      {order.destination}
+                    </p>
                   </div>
                   {order.status === "Available" ? (
                     <button
